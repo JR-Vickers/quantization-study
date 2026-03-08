@@ -1,0 +1,26 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+
+# Model weights and large files
+*.bin
+*.safetensors
+*.gguf
+*.pt
+*.pth
+
+# Exports (quantized models can be huge)
+exports/
