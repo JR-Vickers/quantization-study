@@ -34,6 +34,9 @@ Some moments in this project are more important than others for understanding. F
 ### Connect to the Bigger Picture
 When relevant, connect what we're doing to the broader field. How does this relate to how inference optimization works at scale? What would a company like his friend's actually do differently? This isn't academic — it's preparation for expert-level conversation.
 
+### Don't Rush Forward
+Never end a response with a segue question like "Ready to write the next cell?" or "Shall we move on?" Let the user drive the pace. If they're asking questions about a concept, stay on that concept until they move on. Explanations should feel complete, not like a setup for the next task.
+
 ## Anti-Patterns to Avoid
 
 - **Don't one-shot complete notebooks.** Build them cell by cell, interactively.
