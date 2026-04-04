@@ -1,0 +1,30 @@
+{
+  "timestamp_utc": "2026-04-04T08:33:30.697898Z",
+  "model_id": "deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct",
+  "ptq_method": "llama.cpp gguf quantization",
+  "artifacts": {
+    "f16_source": {
+      "path": "/Users/jarrett/dev/quantization-study/exports/DeepSeek-Coder-V2-Lite-Instruct-F16.gguf",
+      "exists": true,
+      "size_bytes": 31424035968,
+      "size_gb_decimal": 31.42,
+      "size_gib_binary": 29.27
+    },
+    "q8_0": {
+      "path": "/Users/jarrett/dev/quantization-study/exports/DeepSeek-Coder-V2-Lite-Instruct-Q8_0.gguf",
+      "exists": true,
+      "size_bytes": 16702520448,
+      "size_gb_decimal": 16.7,
+      "size_gib_binary": 15.56
+    },
+    "q4_k_m": {
+      "path": "/Users/jarrett/dev/quantization-study/exports/DeepSeek-Coder-V2-Lite-Instruct-Q4_K_M.gguf",
+      "exists": true,
+      "size_bytes": 10367958144,
+      "size_gb_decimal": 10.37,
+      "size_gib_binary": 9.66
+    }
+  },
+  "compression_q8_vs_f16": 0.5315,
+  "compression_q4_vs_f16": 0.3299
+}
