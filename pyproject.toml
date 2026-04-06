@@ -9,6 +9,7 @@ dependencies = [
     "gguf>=0.18.0",
     "ipykernel>=7.2.0",
     "jupyter>=1.1.1",
+    "llama-cpp-python>=0.3.20",
     "matplotlib>=3.10.8",
     "protobuf>=7.34.1",
     "sentencepiece>=0.2.1",
