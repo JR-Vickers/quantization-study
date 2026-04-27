@@ -1,0 +1,31 @@
+{
+  "timestamp_utc": "2026-04-07T11:57:13.741556+00:00",
+  "notebook": "07_sensitivity_analysis",
+  "harness": {
+    "backend": "llama_cpp",
+    "dataset": "openai/openai_humaneval",
+    "n_total": 164,
+    "notes": "Parity runs under same backend/settings; use fp16 here as Notebook-07 reference, not notebook-03 transformers bsaeline."
+  },
+  "latest_runs": {
+    "q4_k_m": {
+      "run_ts": "20260407T063833Z",
+      "pass_at_1_percent": 75.0,
+      "path": "/Users/jarrett/dev/quantization-study/results/07_q4_k_m_humaneval_20260407T063833Z.json"
+    },
+    "fp16": {
+      "run_ts": "20260407T064700Z",
+      "pass_at_1_percent": 72.560976,
+      "path": "/Users/jarrett/dev/quantization-study/results/07_fp16_humaneval_20260407T064700Z.json"
+    },
+    "q8_0": {
+      "run_ts": "20260407T064158Z",
+      "pass_at_1_percent": 71.95122
+    }
+  },
+  "ranking": [
+    "q4_k_m",
+    "fp16",
+    "q8_0"
+  ]
+}

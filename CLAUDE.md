@@ -52,6 +52,7 @@ Never end a response with a segue question like "Ready to write the next cell?" 
 - All visualizations should have clear titles, axis labels, and annotations
 - Results from previous notebooks that are needed in later ones should be saved to `results/` as JSON and loaded explicitly — no hidden state between notebooks
 - Helper functions that get reused across notebooks go in `utils/` but only after they've been written inline first and understood
+- Preserve a visible sense of pipeline progression: once an evaluation/benchmark step is understood, avoid re-implementing the full loop in later cells. Refactor into small parameterized helpers (e.g., swap model/artifact only) so later notebooks compose prior work instead of duplicating it.
 
 ## Progression Rules
 
