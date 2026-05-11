@@ -1,12 +1,12 @@
 {
-  "timestamp_utc": "2026-04-07T06:14:01.774388+00:00",
+  "timestamp_utc": "2026-05-11T12:36:02.496498+00:00",
   "notebook": "07_sensitivity_analysis",
   "model_id": "deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct",
   "reference": {
     "baseline_pass_at_1_percent": 72.560976,
     "baseline_source": "/Users/jarrett/dev/quantization-study/results/07_parity_baseline_summary.json",
     "baseline_kind": "fp16_llama_cpp_parity",
-    "updated_at_utc": "2026-04-07T12:07:38.958973+00:00"
+    "updated_at_utc": "2026-05-11T13:48:07.919623+00:00"
   },
   "design": {
     "phase_1_layer_groups": 9,
@@ -26,13 +26,13 @@
         "target_experts": null,
         "quantize_to": "q4_k_m",
         "keep_rest_as": "fp16",
-        "status": "cancelled",
-        "candidate_pass_at_1_percent": null,
-        "delta_pass_at_1_percent": null,
-        "relative_drop": null,
-        "notes": "cancelled after harness/baseline reset",
-        "started_at_utc": "2026-04-07T06:14:05.604603+00:00",
-        "cancelled_at_utc": "2026-04-07T12:28:15.421540+00:00"
+        "status": "completed",
+        "candidate_pass_at_1_percent": 49.390244,
+        "delta_pass_at_1_percent": 23.170731999999994,
+        "relative_drop": 0.3193277334086575,
+        "notes": "full HumanEval run",
+        "started_at_utc": "2026-05-11T12:36:04.050795+00:00",
+        "completed_at_utc": "2026-05-11T13:05:20.962548+00:00"
       },
       {
         "ablation_id": "layer_group_01",
@@ -45,12 +45,13 @@
         "target_experts": null,
         "quantize_to": "q4_k_m",
         "keep_rest_as": "fp16",
-        "status": "in_progress",
+        "status": "cancelled",
         "candidate_pass_at_1_percent": null,
         "delta_pass_at_1_percent": null,
         "relative_drop": null,
-        "notes": "",
-        "started_at_utc": "2026-04-07T12:28:15.421636+00:00"
+        "notes": "cancelled after harness/baseline reset",
+        "started_at_utc": "2026-05-11T13:48:09.070707+00:00",
+        "cancelled_at_utc": "2026-05-11T13:48:10.796856+00:00"
       },
       {
         "ablation_id": "layer_group_02",
@@ -63,11 +64,12 @@
         "target_experts": null,
         "quantize_to": "q4_k_m",
         "keep_rest_as": "fp16",
-        "status": "pending",
+        "status": "in_progress",
         "candidate_pass_at_1_percent": null,
         "delta_pass_at_1_percent": null,
         "relative_drop": null,
-        "notes": ""
+        "notes": "",
+        "started_at_utc": "2026-05-11T13:48:10.796930+00:00"
       },
       {
         "ablation_id": "layer_group_03",
