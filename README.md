@@ -1,6 +1,9 @@
 # Quantization Study: DeepSeek-Coder-V2-Lite-Instruct
 
-A learning-first, notebook-driven study of quantization effects on a 16B Mixture-of-Experts coding model.
+This project is a study of quantization effects on DeepSeek-Coder-V2-Lite-Instruct, a 16B-parameter mixture-of-experts coding model.  This model was chosen for several reasons:
+
+- Low parameter count enables fast iteration in local environment
+- Coding outputs are easy to verify, permitting accurate performance tests
 
 ## What this project is
 
@@ -11,7 +14,7 @@ This repo investigates how reduced precision (FP16 -> Q8_0 -> Q4_K_M) impacts:
 - sensitivity by layer/expert (MoE-specific)
 
 Model: `deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct`  
-Hardware target: Apple M4 Max (64GB RAM)  
+Hardware target: Apple M4 Max (64GB RAM)
 Quantization backend: `llama.cpp` / GGUF
 
 ## Current status
