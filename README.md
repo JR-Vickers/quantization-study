@@ -26,7 +26,9 @@ Completed notebooks:
 - `04_manual_quantization.ipynb`
 - `05_ptq_with_tooling.ipynb`
 - `06_benchmarking.ipynb`
-- `07_sensitivity_analysis.ipynb` (in progress for ablation sweep)
+
+In progress:
+- `07_sensitivity_analysis.ipynb` (reset for a cleaner per-layer/per-expert sensitivity workflow)
 
 Planned:
 - `08_mixed_precision.ipynb`
@@ -64,13 +66,14 @@ Derived speedups vs FP16:
 - Q8_0: **1.53x**
 - Q4_K_M: **1.84x**
 
-### 4) Parity quality runs (Notebook 07, llama.cpp backend)
-From `results/07_parity_baseline_summary.json`:
-- FP16 pass@1: **72.56%**
-- Q8_0 pass@1: **71.95%**
-- Q4_K_M pass@1: **75.00%**
+### 4) Sensitivity analysis (Notebook 07)
+Notebook 07 has been reset so the sensitivity workflow can be rebuilt clearly.
 
-Note: these are same-harness parity runs and are the correct baseline for Notebook 07 comparisons.
+The notebook should distinguish two related but different tasks:
+- Whole-model parity checks compare complete FP16, Q8_0, and Q4_K_M artifacts under the same evaluation backend.
+- Sensitivity ablations quantize one selected layer group or expert while holding the rest of the model constant, then measure the quality delta.
+
+The next milestone is one valid end-to-end ablation run. After that works, the notebook can grow into a manifest-driven sweep and produce layer/expert rankings.
 
 ### 5) Manual quantization insight (Notebook 04)
 From `results/04_manual_quantization.json`:
@@ -89,7 +92,7 @@ This is the core intuition behind why smarter quantization schemes outperform na
 4. Manual INT8 math (single-layer + layerwise error analysis)
 5. PTQ exports to GGUF (Q8_0, Q4_K_M)
 6. End-to-end perf benchmarking across precisions
-7. Layer/expert sensitivity ablations (ongoing)
+7. Layer/expert sensitivity analysis (reset and being rebuilt)
 8. Mixed-precision policy design (planned)
 
 ## Reproducibility
@@ -120,8 +123,8 @@ Results are saved into `results/` as JSON after each notebook.
 
 ## Caveats
 
-- Notebook 03 baseline (`transformers`) and Notebook 07 parity runs (`llama.cpp`) use different harnesses; do not compare them directly without accounting for backend differences.
-- Sensitivity sweep in Notebook 07 is still running; final per-layer/per-expert ranking is not complete yet.
+- Notebook 03 baseline (`transformers`) and later Notebook 07 parity runs (`llama.cpp`) may use different harnesses; do not compare them directly without accounting for backend differences.
+- Notebook 07 should not treat a manifest entry as a completed ablation unless there is a real candidate model artifact or runtime mechanism that applies the targeted quantization.
 
 ## References
 

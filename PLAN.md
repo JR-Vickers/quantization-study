@@ -4,6 +4,8 @@
 
 Perform a systematic quantization study on DeepSeek-Coder-V2-Lite-Instruct (16B parameters, MoE architecture) to understand how reduced numerical precision affects code generation quality and inference performance. The goal is to produce a rigorous benchmark comparing FP16, INT8, and INT4 precision levels, including per-layer and per-expert sensitivity analysis.
 
+The main deliverable is the analysis: measured tradeoffs, clear methodology, sensitivity findings, and a defensible mixed-precision policy. GGUF artifacts are important supporting artifacts for deployment-style benchmarking, but the project should not depend on producing a custom mixed-precision GGUF unless the tooling supports it cleanly.
+
 ## Why This Model
 
 - **DeepSeek-Coder-V2-Lite-Instruct** (Hugging Face ID: `deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct`)
@@ -59,9 +61,9 @@ This project is optimized for deep understanding, not speed of completion. The n
 
 6. **06 — Benchmarking:** Systematic measurement across all precision levels. Quality (HumanEval, MBPP), speed (tokens/sec), memory. Produce clean comparison tables and charts.
 
-7. **07 — Sensitivity Analysis:** Per-layer and per-expert analysis. Which components of the model are most affected by quantization? Heatmaps and visualizations. This is the core intellectual contribution.
+7. **07 — Sensitivity Analysis:** Per-layer and per-expert analysis. Which components of the model are most affected by quantization? Use controlled ablations to estimate component sensitivity, then produce rankings and heatmaps. This is the core intellectual contribution.
 
-8. **08 — Mixed Precision:** Based on sensitivity findings, construct an optimized mixed-precision configuration. Benchmark it. Write up conclusions.
+8. **08 — Mixed Precision Policy:** Based on sensitivity findings, design a mixed-precision policy. The minimum output is a clear recommendation for which components should remain higher precision and which can tolerate lower precision. If the tooling supports targeted mixed-precision artifacts, validate the policy with an implementation; otherwise, document the policy as an evidence-backed design and identify artifact generation as future work.
 
 **Important:** Original model weights are NOT stored in this project. They live in the default Hugging Face cache (`~/.cache/huggingface/hub/`). Load them by Hugging Face ID:
 
@@ -113,21 +115,35 @@ For each precision level (FP16, INT8, INT4), measure:
 
 Store all results as structured JSON in `results/`.
 
+Notebook 06 focuses on deployment-style behavior of complete GGUF artifacts. These results establish the practical payoff of quantization: smaller files, lower memory pressure, and faster inference. They do not, by themselves, explain which internal components are responsible for any quality change.
+
 ### Phase 4: Sensitivity Analysis
 
 This is where the project goes from "I ran a script" to "I understand the architecture."
 
-1. **Per-layer analysis:** Quantize individual layers (or groups of layers) to INT4 while keeping the rest at FP16. Measure HumanEval degradation per layer to identify which layers are most sensitive.
+1. **Per-layer analysis:** Quantize individual layers (or groups of layers) while keeping the rest of the model at the reference precision. Measure HumanEval degradation per layer to identify which layers are most sensitive.
 2. **Per-expert analysis (MoE-specific):** Since this is a Mixture of Experts model, analyze whether certain experts degrade more under quantization than others. This could reveal which experts encode more critical information.
-3. **Mixed-precision experiment:** Based on sensitivity results, construct a mixed-precision configuration — INT4 for robust layers/experts, INT8 for sensitive ones — and benchmark it. The goal is to find a configuration that approaches INT4 memory/speed while retaining closer to INT8 quality.
+3. **Methodology distinction:** GGUF artifacts are the right tool for whole-model deployment benchmarking. PyTorch/runtime ablations may be the right tool for targeted sensitivity analysis because they expose individual tensors and modules directly. If Notebook 07 uses simulated quantization in PyTorch, label the results as component-level sensitivity estimates, not final deployment measurements.
+4. **Mixed-precision policy:** Based on sensitivity results, recommend a policy such as INT4 for robust layers/experts and INT8 or FP16 for sensitive ones. The goal is to explain how one would approach INT4-like memory/speed while protecting components that appear quality-critical.
 
-### Phase 5: Writeup
+### Phase 5: Mixed Precision Synthesis
+
+Notebook 08 synthesizes the deployment and sensitivity evidence:
+
+- Use Notebook 06 to quantify the payoff of lower precision in real GGUF artifacts.
+- Use Notebook 07 to identify which components appear fragile under targeted quantization.
+- Produce a mixed-precision policy that is explicit about assumptions, expected benefits, and validation limits.
+- If the available tooling supports tensor-level or layer-level mixed-precision GGUF generation, build and benchmark a candidate artifact.
+- If the tooling does not support that cleanly, document the policy and the missing implementation step rather than forcing an artifact that the methodology cannot justify.
+
+### Phase 6: Writeup
 
 Produce a clear README.md with:
 - Methodology description
 - Results tables (quality, speed, memory across precision levels)
 - Sensitivity analysis visualizations (heatmaps of per-layer/per-expert degradation)
 - Key findings and interpretation
+- Mixed-precision policy recommendation and any tooling limitations
 - Reproduction instructions
 
 ## Evaluation Details

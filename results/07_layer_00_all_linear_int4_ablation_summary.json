@@ -1,0 +1,48 @@
+{
+  "timestamp_utc": "2026-05-22T05:57:49.924666+00:00",
+  "notebook": "07_sensitivity_analysis",
+  "ablation_id": "layer_00_all_linear_int4_per_channel_simulated",
+  "ablation_kind": "layer_all_linear",
+  "target": {
+    "layer_idx": 0,
+    "modules": [
+      "model.layers.0.self_attn.q_proj",
+      "model.layers.0.self_attn.kv_a_proj_with_mqa",
+      "model.layers.0.self_attn.kv_b_proj",
+      "model.layers.0.self_attn.o_proj",
+      "model.layers.0.mlp.gate_proj",
+      "model.layers.0.mlp.up_proj",
+      "model.layers.0.mlp.down_proj"
+    ],
+    "n_modules": 7
+  },
+  "quantization": {
+    "method": "simulated_symmetric_per_channel",
+    "n_bits": 4,
+    "runtime": "pytorch_float_weights_after_dequantization"
+  },
+  "evaluation": {
+    "dataset": "openai/openai_humaneval",
+    "n_total": 164,
+    "metric": "pass_at_1_percent"
+  },
+  "reference": {
+    "label": "current_fp_model_same_harness",
+    "pass_at_1_percent": 70.1219512195122,
+    "n_passed": 115
+  },
+  "candidate": {
+    "label": "layer_00_all_linear_int4_per_channel_simulated",
+    "pass_at_1_percent": 71.34146341463415,
+    "n_passed": 117
+  },
+  "sensitivity": {
+    "delta_pass_at_1_percent": -1.2195121951219505,
+    "relative_drop": -0.017391304347826077
+  },
+  "notes": [
+    "This is a component-level PyTorch simulated quantization ablation.",
+    "It is not a GGUF deployment benchmark.",
+    "The model weights were restored after candidate evaluation."
+  ]
+}
