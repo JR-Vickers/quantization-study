@@ -31,7 +31,7 @@ Completed notebooks:
 - `09_mixed_precision_validation.ipynb`
 
 Current work:
-- Stabilization pass. The first priority is to tighten Notebook 07 before smoothing Notebook 08 and Notebook 09.
+- Stabilization pass. Notebook 07 has been tightened around a symmetric full-follow-up design; Notebook 08 is being aligned to consume that completed evidence before Notebook 09 is revisited.
 
 Notebook 09 was added after the original eight-notebook plan because mixed-precision policy design and mixed-artifact validation became separate concerns. Notebook 08 should explain and emit policy candidates; Notebook 09 should validate concrete candidates and record each iteration clearly.
 
@@ -73,14 +73,15 @@ From `results/07_layer_int4_screening_summary.json` and `results/07_selected_lay
 
 - Notebook 07 uses targeted PyTorch INT4 ablations as component-level sensitivity estimates, not deployment measurements.
 - The full PyTorch baseline in Notebook 07 is **70.12%** HumanEval pass@1 (115/164).
-- The strongest 30-problem screen hits were layers **3**, **26**, and **11**.
-- Full HumanEval follow-up showed layer **26** was highly sensitive and layer **3** was meaningfully sensitive under targeted INT4 pressure.
-- Layer **17** showed no observed full-run harm in that run; this is treated as noise/no-harm evidence, not proof that INT4 improves quality.
+- The four strongest 30-problem screen hits were layers **3**, **26**, **11**, and **14**.
+- Full HumanEval follow-up is complete for the top four screen hits and bottom four screen controls.
+- The protected group **3, 11, 14, 26** had a mean full INT4 drop of **13.11** pass@1 points.
+- The low-sensitivity control group **0, 2, 15, 17** had no observed full-run harm; its mean full delta was **-3.51** points. Negative deltas are treated as no-harm evidence, not proof that INT4 improves quality.
 
-Notebook 07 is the current stabilization target. It should be made tight before Notebook 08 and Notebook 09 are refactored around reusable policy/run machinery.
+Notebook 08 should now protect layers `3, 11, 14, 26` and treat layers `0, 2, 15, 17` as the best-supported lower-precision candidates.
 
 ### 5) Mixed-precision policy and validation (Notebooks 08-09)
-Notebook 08 produced an evidence-backed mixed-precision policy and a tensor-type manifest path. Notebook 09 then entered iteration mode, validating concrete mixed GGUF candidates.
+Notebook 08 is being restabilized around the completed Notebook 07 evidence: Q4_K_M default with Q8_0 overrides for protected layers `3, 11, 14, 26`. Notebook 09 then validates concrete mixed GGUF candidates.
 
 Current strongest saved validation from `results/09_mixed_precision_validation.json`:
 
@@ -91,7 +92,7 @@ Current strongest saved validation from `results/09_mixed_precision_validation.j
 | Q4_K_M GGUF | 9.66 | 56.71% | 93/164 | 127.77 |
 | Mixed v2 GGUF | 11.33 | 66.46% | 109/164 | 104.53 |
 
-The mixed v2 candidate protects layers `1, 3, 6, 8, 10, 11, 14, 26` at Q8_0 while using Q4_K_M as the default. It recovers substantial quality versus Q4_K_M, but it is slower than Q4_K_M and slightly slower than Q8_0 in the current short benchmark. Treat it as the best saved candidate so far, not yet as the final canonical policy.
+The mixed v2 candidate protects layers `1, 3, 6, 8, 10, 11, 14, 26` at Q8_0 while using Q4_K_M as the default. It recovers substantial quality versus Q4_K_M, but it is slower than Q4_K_M and slightly slower than Q8_0 in the current short benchmark. Treat it as the best saved validation run so far, not as the final canonical policy. The next canonical candidate should use the restabilized Notebook 08 policy.
 
 ### 6) Manual quantization insight (Notebook 04)
 From `results/04_manual_quantization.json`:
