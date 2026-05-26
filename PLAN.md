@@ -32,7 +32,8 @@ quantization-study/
 │   ├── 05_ptq_with_tooling.ipynb
 │   ├── 06_benchmarking.ipynb
 │   ├── 07_sensitivity_analysis.ipynb
-│   └── 08_mixed_precision.ipynb
+│   ├── 08_mixed_precision.ipynb
+│   └── 09_mixed_precision_validation.ipynb
 ├── utils/                    # shared helper functions extracted from notebooks
 ├── results/                  # all benchmark outputs, JSON format
 ├── exports/                  # quantized model artifacts (INT8, INT4, mixed)
@@ -63,7 +64,9 @@ This project is optimized for deep understanding, not speed of completion. The n
 
 7. **07 — Sensitivity Analysis:** Per-layer and per-expert analysis. Which components of the model are most affected by quantization? Use controlled ablations to estimate component sensitivity, then produce rankings and heatmaps. This is the core intellectual contribution.
 
-8. **08 — Mixed Precision Policy:** Based on sensitivity findings, design a mixed-precision policy. The minimum output is a clear recommendation for which components should remain higher precision and which can tolerate lower precision. If the tooling supports targeted mixed-precision artifacts, validate the policy with an implementation; otherwise, document the policy as an evidence-backed design and identify artifact generation as future work.
+8. **08 — Mixed Precision Policy:** Based on sensitivity findings, design a mixed-precision policy. The minimum output is a clear recommendation for which components should remain higher precision and which can tolerate lower precision. If the tooling supports targeted mixed-precision artifacts, prepare a reproducible tensor-type manifest and optional build path; otherwise, document the policy as an evidence-backed design and identify artifact generation as future work.
+
+9. **09 — Mixed Precision Validation:** Validate concrete mixed-precision GGUF candidates produced from Notebook 08 policies. Compare each candidate against FP16, Q8_0, and Q4_K_M GGUF references under one llama.cpp-based harness. Treat each policy iteration as its own run with explicit metadata so the best-performing policy can later be promoted to canonical.
 
 **Important:** Original model weights are NOT stored in this project. They live in the default Hugging Face cache (`~/.cache/huggingface/hub/`). Load them by Hugging Face ID:
 
@@ -133,17 +136,30 @@ Notebook 08 synthesizes the deployment and sensitivity evidence:
 - Use Notebook 06 to quantify the payoff of lower precision in real GGUF artifacts.
 - Use Notebook 07 to identify which components appear fragile under targeted quantization.
 - Produce a mixed-precision policy that is explicit about assumptions, expected benefits, and validation limits.
-- If the available tooling supports tensor-level or layer-level mixed-precision GGUF generation, build and benchmark a candidate artifact.
+- If the available tooling supports tensor-level or layer-level mixed-precision GGUF generation, prepare a candidate artifact plan and optionally build a candidate.
 - If the tooling does not support that cleanly, document the policy and the missing implementation step rather than forcing an artifact that the methodology cannot justify.
 
-### Phase 6: Writeup
+### Phase 6: Mixed Precision Validation
+
+Notebook 09 validates concrete policy candidates:
+
+- Load one explicit policy candidate at a time.
+- Build or locate the corresponding mixed GGUF artifact.
+- Verify that protected tensors use the requested precision.
+- Run or load HumanEval quality results for FP16, Q8_0, Q4_K_M, and mixed GGUF artifacts.
+- Run or load a small same-harness performance benchmark.
+- Save each policy iteration as a distinct validation artifact, then compare policy candidates.
+
+This phase exists because policy design and artifact validation are different claims. Notebook 08 can justify a candidate policy; Notebook 09 determines whether a particular artifact actually preserves enough quality while retaining enough of the Q4_K_M deployment payoff.
+
+### Phase 7: Writeup
 
 Produce a clear README.md with:
 - Methodology description
 - Results tables (quality, speed, memory across precision levels)
 - Sensitivity analysis visualizations (heatmaps of per-layer/per-expert degradation)
 - Key findings and interpretation
-- Mixed-precision policy recommendation and any tooling limitations
+- Mixed-precision policy recommendation, validation results, and any tooling limitations
 - Reproduction instructions
 
 ## Evaluation Details

@@ -26,12 +26,14 @@ Completed notebooks:
 - `04_manual_quantization.ipynb`
 - `05_ptq_with_tooling.ipynb`
 - `06_benchmarking.ipynb`
-
-In progress:
-- `07_sensitivity_analysis.ipynb` (reset for a cleaner per-layer/per-expert sensitivity workflow)
-
-Planned:
+- `07_sensitivity_analysis.ipynb`
 - `08_mixed_precision.ipynb`
+- `09_mixed_precision_validation.ipynb`
+
+Current work:
+- Stabilization pass. The first priority is to tighten Notebook 07 before smoothing Notebook 08 and Notebook 09.
+
+Notebook 09 was added after the original eight-notebook plan because mixed-precision policy design and mixed-artifact validation became separate concerns. Notebook 08 should explain and emit policy candidates; Notebook 09 should validate concrete candidates and record each iteration clearly.
 
 ## Repository structure
 
@@ -58,24 +60,40 @@ From `results/06_benchmarking_perf_snapshot.json`:
 
 | Precision | Tokens/sec (mean) | TTFT (s) | Total latency (s) | Peak RSS (GiB) |
 |---|---:|---:|---:|---:|
-| FP16 | 74.74 | 0.0564 | 1.7785 | 29.45 |
-| Q8_0 | 114.01 | 0.0505 | 1.1794 | 38.82 |
-| Q4_K_M | 137.56 | 0.0415 | 0.9769 | 9.44 |
+| FP16 | 75.31 | 0.0547 | 1.7632 | 29.51 |
+| Q8_0 | 108.70 | 0.0516 | 1.2357 | 32.28 |
+| Q4_K_M | 126.85 | 0.0426 | 1.0569 | 9.46 |
 
 Derived speedups vs FP16:
-- Q8_0: **1.53x**
-- Q4_K_M: **1.84x**
+- Q8_0: **1.44x**
+- Q4_K_M: **1.68x**
 
 ### 4) Sensitivity analysis (Notebook 07)
-Notebook 07 has been reset so the sensitivity workflow can be rebuilt clearly.
+From `results/07_layer_int4_screening_summary.json` and `results/07_selected_layer_int4_full_followup_runs.json`:
 
-The notebook should distinguish two related but different tasks:
-- Whole-model parity checks compare complete FP16, Q8_0, and Q4_K_M artifacts under the same evaluation backend.
-- Sensitivity ablations quantize one selected layer group or expert while holding the rest of the model constant, then measure the quality delta.
+- Notebook 07 uses targeted PyTorch INT4 ablations as component-level sensitivity estimates, not deployment measurements.
+- The full PyTorch baseline in Notebook 07 is **70.12%** HumanEval pass@1 (115/164).
+- The strongest 30-problem screen hits were layers **3**, **26**, and **11**.
+- Full HumanEval follow-up showed layer **26** was highly sensitive and layer **3** was meaningfully sensitive under targeted INT4 pressure.
+- Layer **17** showed no observed full-run harm in that run; this is treated as noise/no-harm evidence, not proof that INT4 improves quality.
 
-The next milestone is one valid end-to-end ablation run. After that works, the notebook can grow into a manifest-driven sweep and produce layer/expert rankings.
+Notebook 07 is the current stabilization target. It should be made tight before Notebook 08 and Notebook 09 are refactored around reusable policy/run machinery.
 
-### 5) Manual quantization insight (Notebook 04)
+### 5) Mixed-precision policy and validation (Notebooks 08-09)
+Notebook 08 produced an evidence-backed mixed-precision policy and a tensor-type manifest path. Notebook 09 then entered iteration mode, validating concrete mixed GGUF candidates.
+
+Current strongest saved validation from `results/09_mixed_precision_validation.json`:
+
+| Model | Size (GiB) | HumanEval pass@1 | Passed | Tok/s |
+|---|---:|---:|---:|---:|
+| FP16 GGUF | 29.27 | 73.17% | 120/164 | 65.90 |
+| Q8_0 GGUF | 15.56 | 71.95% | 118/164 | 109.23 |
+| Q4_K_M GGUF | 9.66 | 56.71% | 93/164 | 127.77 |
+| Mixed v2 GGUF | 11.33 | 66.46% | 109/164 | 104.53 |
+
+The mixed v2 candidate protects layers `1, 3, 6, 8, 10, 11, 14, 26` at Q8_0 while using Q4_K_M as the default. It recovers substantial quality versus Q4_K_M, but it is slower than Q4_K_M and slightly slower than Q8_0 in the current short benchmark. Treat it as the best saved candidate so far, not yet as the final canonical policy.
+
+### 6) Manual quantization insight (Notebook 04)
 From `results/04_manual_quantization.json`:
 - For sampled projection matrices, per-channel INT8 quantization reduced average MAE dramatically vs per-tensor quantization:
   - `down_proj`: ~**90.28%** MAE improvement
@@ -92,8 +110,9 @@ This is the core intuition behind why smarter quantization schemes outperform na
 4. Manual INT8 math (single-layer + layerwise error analysis)
 5. PTQ exports to GGUF (Q8_0, Q4_K_M)
 6. End-to-end perf benchmarking across precisions
-7. Layer/expert sensitivity analysis (reset and being rebuilt)
-8. Mixed-precision policy design (planned)
+7. Layer/expert sensitivity analysis
+8. Mixed-precision policy design
+9. Mixed-precision artifact validation and policy iteration
 
 ## Reproducibility
 
@@ -111,7 +130,7 @@ uv sync
 uv run jupyter lab
 ```
 
-3) Run notebooks in order (`01` -> `08`).
+3) Run notebooks in order (`01` -> `09`).
 
 Results are saved into `results/` as JSON after each notebook.
 
@@ -124,7 +143,9 @@ Results are saved into `results/` as JSON after each notebook.
 ## Caveats
 
 - Notebook 03 baseline (`transformers`) and later Notebook 07 parity runs (`llama.cpp`) may use different harnesses; do not compare them directly without accounting for backend differences.
-- Notebook 07 should not treat a manifest entry as a completed ablation unless there is a real candidate model artifact or runtime mechanism that applies the targeted quantization.
+- Notebook 07 sensitivity ablations are component-level PyTorch estimates, not final deployment measurements.
+- Notebook 08 policy artifacts are recommendations until Notebook 09 validates a concrete mixed GGUF.
+- Notebook 09 is currently in iteration mode. Protected layers, policy IDs, and artifact paths should be made more reusable before further experiments.
 
 ## References
 
