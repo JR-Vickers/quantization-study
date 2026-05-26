@@ -1,5 +1,5 @@
 {
-  "timestamp_utc": "2026-05-26T13:17:13.923001+00:00",
+  "timestamp_utc": "2026-05-26T14:24:29.830781+00:00",
   "notebook": "08_mixed_precision",
   "source_artifacts": {
     "deployment_perf": "/Users/jarrett/dev/quantization-study/results/06_benchmarking_perf_snapshot.json",
@@ -714,29 +714,95 @@
       "size_vs_q8_percent": 67.20670489235218
     },
     "build": {
-      "requested": false,
-      "status": "skipped_by_flag",
+      "requested": true,
+      "status": "complete",
       "artifact_path": "/Users/jarrett/dev/quantization-study/exports/DeepSeek-Coder-V2-Lite-Instruct-MIXED-Q4_K_M-protect-03-11-14-26-Q8_0.gguf",
       "artifact_exists_before": false,
-      "artifact_size_gib": null,
-      "command": null,
-      "returncode": null,
-      "output_tail": null,
-      "artifact_exists_after": false
+      "artifact_size_gib": 10.461085438728333,
+      "command": [
+        "/opt/homebrew/bin/llama-quantize",
+        "--tensor-type-file",
+        "/Users/jarrett/dev/quantization-study/results/08_aggressive_q4_default_q8_protected_03_11_14_26.tensor_types.txt",
+        "/Users/jarrett/dev/quantization-study/exports/DeepSeek-Coder-V2-Lite-Instruct-F16.gguf",
+        "/Users/jarrett/dev/quantization-study/exports/DeepSeek-Coder-V2-Lite-Instruct-MIXED-Q4_K_M-protect-03-11-14-26-Q8_0.gguf",
+        "Q4_K_M"
+      ],
+      "returncode": 0,
+      "output_tail": "[ 390/ 404] blk.26.attn_k_b.weight               - [   128,    512,     16,      1], type =    f16, converting to q8_0 .. size =     2.00 MiB ->     1.06 MiB\n[ 391/ 404] blk.26.attn_kv_a_mqa.weight          - [  2048,    576,      1,      1], type =    f16, converting to q8_0 .. size =     2.25 MiB ->     1.20 MiB\n[ 392/ 404] blk.26.attn_kv_a_norm.weight         - [   512,      1,      1,      1], type =    f32, size =    0.002 MiB\n[ 393/ 404] blk.26.attn_norm.weight              - [  2048,      1,      1,      1], type =    f32, size =    0.008 MiB\n[ 394/ 404] blk.26.attn_output.weight            - [  2048,   2048,      1,      1], type =    f16, converting to q8_0 .. size =     8.00 MiB ->     4.25 MiB\n[ 395/ 404] blk.26.attn_q.weight                 - [  2048,   3072,      1,      1], type =    f16, converting to q8_0 .. size =    12.00 MiB ->     6.38 MiB\n[ 396/ 404] blk.26.attn_v_b.weight               - [   512,    128,     16,      1], type =    f16, converting to q8_0 .. size =     2.00 MiB ->     1.06 MiB\n[ 397/ 404] blk.26.ffn_down_exps.weight          - [  1408,   2048,     64,      1], type =    f16, converting to q8_0 .. size =   352.00 MiB ->   187.00 MiB\n[ 398/ 404] blk.26.ffn_down_shexp.weight         - [  2816,   2048,      1,      1], type =    f16, converting to q8_0 .. size =    11.00 MiB ->     5.84 MiB\n[ 399/ 404] blk.26.ffn_gate_exps.weight          - [  2048,   1408,     64,      1], type =    f16, converting to q8_0 .. size =   352.00 MiB ->   187.00 MiB\n[ 400/ 404] blk.26.ffn_gate_inp.weight           - [  2048,     64,      1,      1], type =    f32, size =    0.500 MiB\n[ 401/ 404] blk.26.ffn_gate_shexp.weight         - [  2048,   2816,      1,      1], type =    f16, converting to q8_0 .. size =    11.00 MiB ->     5.84 MiB\n[ 402/ 404] blk.26.ffn_norm.weight               - [  2048,      1,      1,      1], type =    f32, size =    0.008 MiB\n[ 403/ 404] blk.26.ffn_up_exps.weight            - [  2048,   1408,     64,      1], type =    f16, converting to q8_0 .. size =   352.00 MiB ->   187.00 MiB\n[ 404/ 404] blk.26.ffn_up_shexp.weight           - [  2048,   2816,      1,      1], type =    f16, converting to q8_0 .. size =    11.00 MiB ->     5.84 MiB\nllama_model_quantize_impl: model size  = 29964.48 MiB (16.00 BPW)\nllama_model_quantize_impl: quant size  = 10708.34 MiB (5.72 BPW)\nllama_model_quantize_impl: WARNING: 46 of 404 tensor(s) required fallback quantization",
+      "artifact_exists_after": true
     },
     "verification": {
       "artifact_path": "/Users/jarrett/dev/quantization-study/exports/DeepSeek-Coder-V2-Lite-Instruct-MIXED-Q4_K_M-protect-03-11-14-26-Q8_0.gguf",
-      "artifact_exists": false,
-      "tensor_type_counts": {},
-      "protected_layer_matrix_types": {},
+      "artifact_exists": true,
+      "tensor_type_counts": {
+        "Q6_K": 10,
+        "F32": 108,
+        "Q4_K": 196,
+        "Q5_0": 36,
+        "Q8_0": 54
+      },
+      "protected_layer_matrix_types": {
+        "3": {
+          "blk.3.attn_k_b.weight": "Q8_0",
+          "blk.3.attn_kv_a_mqa.weight": "Q8_0",
+          "blk.3.attn_output.weight": "Q8_0",
+          "blk.3.attn_q.weight": "Q8_0",
+          "blk.3.attn_v_b.weight": "Q8_0",
+          "blk.3.ffn_down_exps.weight": "Q8_0",
+          "blk.3.ffn_down_shexp.weight": "Q8_0",
+          "blk.3.ffn_gate_exps.weight": "Q8_0",
+          "blk.3.ffn_gate_shexp.weight": "Q8_0",
+          "blk.3.ffn_up_exps.weight": "Q8_0",
+          "blk.3.ffn_up_shexp.weight": "Q8_0"
+        },
+        "11": {
+          "blk.11.attn_k_b.weight": "Q8_0",
+          "blk.11.attn_kv_a_mqa.weight": "Q8_0",
+          "blk.11.attn_output.weight": "Q8_0",
+          "blk.11.attn_q.weight": "Q8_0",
+          "blk.11.attn_v_b.weight": "Q8_0",
+          "blk.11.ffn_down_exps.weight": "Q8_0",
+          "blk.11.ffn_down_shexp.weight": "Q8_0",
+          "blk.11.ffn_gate_exps.weight": "Q8_0",
+          "blk.11.ffn_gate_shexp.weight": "Q8_0",
+          "blk.11.ffn_up_exps.weight": "Q8_0",
+          "blk.11.ffn_up_shexp.weight": "Q8_0"
+        },
+        "14": {
+          "blk.14.attn_k_b.weight": "Q8_0",
+          "blk.14.attn_kv_a_mqa.weight": "Q8_0",
+          "blk.14.attn_output.weight": "Q8_0",
+          "blk.14.attn_q.weight": "Q8_0",
+          "blk.14.attn_v_b.weight": "Q8_0",
+          "blk.14.ffn_down_exps.weight": "Q8_0",
+          "blk.14.ffn_down_shexp.weight": "Q8_0",
+          "blk.14.ffn_gate_exps.weight": "Q8_0",
+          "blk.14.ffn_gate_shexp.weight": "Q8_0",
+          "blk.14.ffn_up_exps.weight": "Q8_0",
+          "blk.14.ffn_up_shexp.weight": "Q8_0"
+        },
+        "26": {
+          "blk.26.attn_k_b.weight": "Q8_0",
+          "blk.26.attn_kv_a_mqa.weight": "Q8_0",
+          "blk.26.attn_output.weight": "Q8_0",
+          "blk.26.attn_q.weight": "Q8_0",
+          "blk.26.attn_v_b.weight": "Q8_0",
+          "blk.26.ffn_down_exps.weight": "Q8_0",
+          "blk.26.ffn_down_shexp.weight": "Q8_0",
+          "blk.26.ffn_gate_exps.weight": "Q8_0",
+          "blk.26.ffn_gate_shexp.weight": "Q8_0",
+          "blk.26.ffn_up_exps.weight": "Q8_0",
+          "blk.26.ffn_up_shexp.weight": "Q8_0"
+        }
+      },
       "protected_layer_non_q8_matrix_tensors": [],
-      "status": "skipped_missing_artifact"
+      "status": "complete"
     },
     "benchmark": {
       "requested": false,
       "status": "skipped_by_flag",
       "artifact_path": "/Users/jarrett/dev/quantization-study/exports/DeepSeek-Coder-V2-Lite-Instruct-MIXED-Q4_K_M-protect-03-11-14-26-Q8_0.gguf",
-      "artifact_exists": false,
+      "artifact_exists": true,
       "summary": null,
       "trials": [],
       "notes": []
