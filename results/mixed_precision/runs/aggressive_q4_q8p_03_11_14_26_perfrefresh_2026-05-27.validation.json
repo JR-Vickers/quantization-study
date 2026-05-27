@@ -1,6 +1,6 @@
 {
   "timestamp_utc": "2026-05-27T02:40:19.565178+00:00",
-  "updated_at_utc": "2026-05-27T03:42:03.930908+00:00",
+  "updated_at_utc": "2026-05-27T09:50:13.764826+00:00",
   "notebook": "09_mixed_precision_validation",
   "iteration_id": "aggressive_q4_q8p_03_11_14_26_perfrefresh_2026-05-27",
   "model_id": "deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct",
@@ -8,10 +8,11 @@
   "source_policy_path": "/Users/jarrett/dev/quantization-study/results/08_mixed_precision_policy.json",
   "run_artifact_path": "/Users/jarrett/dev/quantization-study/results/mixed_precision/runs/aggressive_q4_q8p_03_11_14_26_perfrefresh_2026-05-27.validation.json",
   "config": {
-    "run_full_humaneval": true,
-    "run_fresh_perf_benchmarks": true,
-    "reevaluate_existing": true,
-    "import_legacy_09_aggregate": true,
+    "run_full_humaneval": false,
+    "run_fresh_perf_benchmarks": false,
+    "reevaluate_existing": false,
+    "import_legacy_09_aggregate": false,
+    "include_perf_snapshots": false,
     "write_aggregate_validation": false,
     "humaneval_model_keys": [
       "fp16",
@@ -68,18 +69,19 @@
       "tensor_types_exists": null,
       "tensor_types_sha256": null
     },
-    "aggressive_q4_k_m_default_q8_protected_layers_11_14_26": {
-      "model_key": "aggressive_q4_k_m_default_q8_protected_layers_11_14_26",
-      "iteration_id": "aggressive_q4_k_m_default_q8_protected_layers_11_14_26",
-      "policy_id": "aggressive_q4_k_m_default_q8_protected_layers_11_14_26",
-      "label": "Aggressive mixed (11,14,26)",
+    "aggressive_q4_k_m_default_q8_protected_layers_3_11_14_26": {
+      "model_key": "aggressive_q4_k_m_default_q8_protected_layers_3_11_14_26",
+      "iteration_id": "aggressive_q4_k_m_default_q8_protected_layers_3_11_14_26",
+      "policy_id": "aggressive_q4_k_m_default_q8_protected_layers_3_11_14_26",
+      "label": "Aggressive mixed (3,11,14,26)",
       "precision": "q4_k_m_default_q8_0_protected",
-      "artifact_path": "/Users/jarrett/dev/quantization-study/exports/DeepSeek-Coder-V2-Lite-Instruct-MIXED-Q4_K_M-protect-11-14-26-Q8_0.gguf",
+      "artifact_path": "/Users/jarrett/dev/quantization-study/exports/DeepSeek-Coder-V2-Lite-Instruct-MIXED-Q4_K_M-protect-03-11-14-26-Q8_0.gguf",
       "artifact_role": "Notebook 08 recommended candidate",
       "is_mixed_candidate": true,
       "default_precision": "q4_k_m",
       "protected_precision": "q8_0",
       "protected_layers": [
+        3,
         11,
         14,
         26
@@ -90,13 +92,13 @@
         15,
         17
       ],
-      "tensor_types_path": "/Users/jarrett/dev/quantization-study/results/08_aggressive_q4_default_q8_protected_11_14_26.tensor_types.txt",
+      "tensor_types_path": "/Users/jarrett/dev/quantization-study/results/08_aggressive_q4_default_q8_protected_03_11_14_26.tensor_types.txt",
       "source_policy_path": "/Users/jarrett/dev/quantization-study/results/08_mixed_precision_policy.json",
       "notes": "Notebook 08 recommended candidate.",
       "artifact_exists": true,
-      "artifact_size_gib": 10.210414052009583,
+      "artifact_size_gib": 10.461085438728333,
       "tensor_types_exists": true,
-      "tensor_types_sha256": "e6f4f72bdf7a3fe2867c0ba9024214894e9adb0c66813551cf6f3db85b4fca92"
+      "tensor_types_sha256": "6887b87262f694d5fff3c9ccbe4a86e33aab001f76473fb2b9fcd5efb094cb32"
     }
   },
   "humaneval_runs": {
@@ -10471,44 +10473,7 @@
       ]
     }
   },
-  "performance_snapshots": [
-    {
-      "model_key": "fp16",
-      "source": "06_imported_perf_snapshot",
-      "artifact_path": "/Users/jarrett/dev/quantization-study/exports/DeepSeek-Coder-V2-Lite-Instruct-F16.gguf",
-      "artifact_size_gib": 29.27,
-      "ttft_sec_mean": 0.054743111000182886,
-      "tokens_per_sec_mean": 75.31342664994155,
-      "total_latency_sec_mean": 1.7632430901655123,
-      "peak_rss_gib": 29.506698608398438,
-      "n_samples": 6,
-      "freshness": "imported snapshot"
-    },
-    {
-      "model_key": "q8_0",
-      "source": "06_imported_perf_snapshot",
-      "artifact_path": "/Users/jarrett/dev/quantization-study/exports/DeepSeek-Coder-V2-Lite-Instruct-Q8_0.gguf",
-      "artifact_size_gib": 15.56,
-      "ttft_sec_mean": 0.05155437500009915,
-      "tokens_per_sec_mean": 108.70042485840777,
-      "total_latency_sec_mean": 1.2357303960003871,
-      "peak_rss_gib": 32.28077697753906,
-      "n_samples": 6,
-      "freshness": "imported snapshot"
-    },
-    {
-      "model_key": "q4_k_m",
-      "source": "06_imported_perf_snapshot",
-      "artifact_path": "/Users/jarrett/dev/quantization-study/exports/DeepSeek-Coder-V2-Lite-Instruct-Q4_K_M.gguf",
-      "artifact_size_gib": 9.66,
-      "ttft_sec_mean": 0.04256972233391328,
-      "tokens_per_sec_mean": 126.84953386847407,
-      "total_latency_sec_mean": 1.0569110831668997,
-      "peak_rss_gib": 9.4569091796875,
-      "n_samples": 6,
-      "freshness": "imported snapshot"
-    }
-  ],
+  "performance_snapshots": [],
   "comparison": {
     "quality_rows": [
       {
@@ -10535,9 +10500,9 @@
         "delta_vs_reference": 0.0,
         "baseline_reference_used": "GGUF FP16",
         "quality_source": "fresh_09_humaneval",
-        "runtime_min_total": 5.966352699999698,
-        "problem_total_sec_mean": 2.1251108927486135,
-        "ttft_sec_mean": 0.24280051748046833,
+        "runtime_min_total": 5.628239811816214,
+        "problem_total_sec_mean": 2.050306911826582,
+        "ttft_sec_mean": 0.22864535369941533,
         "run_scope": "164/164",
         "status": "complete"
       },
@@ -10550,9 +10515,9 @@
         "delta_vs_reference": -1.2195121951219505,
         "baseline_reference_used": "GGUF FP16",
         "quality_source": "fresh_09_humaneval",
-        "runtime_min_total": 4.628324299999319,
-        "problem_total_sec_mean": 1.6539204314275837,
-        "ttft_sec_mean": 0.19953837293156185,
+        "runtime_min_total": 4.612593690267143,
+        "problem_total_sec_mean": 1.6478900129061402,
+        "ttft_sec_mean": 0.19855030257753153,
         "run_scope": "164/164",
         "status": "complete"
       },
@@ -10565,9 +10530,9 @@
         "delta_vs_reference": -16.46341463414634,
         "baseline_reference_used": "GGUF FP16",
         "quality_source": "fresh_09_humaneval",
-        "runtime_min_total": 3.764537404166185,
-        "problem_total_sec_mean": 1.3531001071809796,
-        "ttft_sec_mean": 0.18345421445541787,
+        "runtime_min_total": 3.751318317350039,
+        "problem_total_sec_mean": 1.3481093570224447,
+        "ttft_sec_mean": 0.18349608309139645,
         "run_scope": "164/164",
         "status": "complete"
       },
@@ -10726,7 +10691,7 @@
     "reference_notes": [
       "GGUF FP16 is the primary quality reference when available.",
       "Notebook 07 PyTorch baseline is context only unless no GGUF FP16 quality run exists.",
-      "Performance rows distinguish fresh Notebook 09 runs from imported snapshots.",
+      "Import mode reuses the saved Notebook 09 runs; historical snapshots stay excluded unless explicitly enabled.",
       "A HumanEval row is complete only when it covers all 164 problems."
     ]
   },
