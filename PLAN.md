@@ -2,9 +2,9 @@
 
 ## Objective
 
-Perform a systematic quantization study on DeepSeek-Coder-V2-Lite-Instruct (16B parameters, MoE architecture) to understand how reduced numerical precision affects code generation quality and inference performance. The goal is to produce a rigorous benchmark comparing FP16, INT8, and INT4 precision levels, including per-layer and per-expert sensitivity analysis.
+Perform a systematic quantization study on DeepSeek-Coder-V2-Lite-Instruct (16B parameters, MoE architecture) to understand how reduced numerical precision affects code generation quality and inference performance. The completed phase produces a rigorous benchmark comparing FP16, Q8_0, Q4_K_M, and layer-level mixed precision. Per-expert sensitivity remains an explicitly scoped follow-up, not a completed claim in this phase.
 
-The main deliverable is the analysis: measured tradeoffs, clear methodology, sensitivity findings, and a defensible mixed-precision policy. GGUF artifacts are important supporting artifacts for deployment-style benchmarking, but the project should not depend on producing a custom mixed-precision GGUF unless the tooling supports it cleanly.
+The main deliverable is the analysis: measured tradeoffs, clear methodology, sensitivity findings, and a defensible mixed-precision policy. GGUF artifacts are important supporting artifacts for deployment-style benchmarking, and the final policy is validated as a concrete mixed-precision GGUF under the same llama.cpp-based harness used for FP16, Q8_0, and Q4_K_M references.
 
 ## Why This Model
 
@@ -62,7 +62,7 @@ This project is optimized for deep understanding, not speed of completion. The n
 
 6. **06 — Benchmarking:** Systematic measurement across all precision levels. Quality (HumanEval, MBPP), speed (tokens/sec), memory. Produce clean comparison tables and charts.
 
-7. **07 — Sensitivity Analysis:** Per-layer and per-expert analysis. Which components of the model are most affected by quantization? Use controlled ablations to estimate component sensitivity, then produce rankings and heatmaps. This is the core intellectual contribution.
+7. **07 — Sensitivity Analysis:** Layer-level sensitivity analysis. Which layers are most affected by quantization? Use controlled ablations to estimate component sensitivity, then produce rankings and heatmaps. Expert-level analysis is documented as a MoE-specific follow-up rather than mixed into the final layer-level policy claim.
 
 8. **08 — Mixed Precision Policy:** Based on sensitivity findings, design a mixed-precision policy. The minimum output is a clear recommendation for which components should remain higher precision and which can tolerate lower precision. If the tooling supports targeted mixed-precision artifacts, prepare a reproducible tensor-type manifest and optional build path; otherwise, document the policy as an evidence-backed design and identify artifact generation as future work.
 
@@ -125,9 +125,9 @@ Notebook 06 focuses on deployment-style behavior of complete GGUF artifacts. The
 This is where the project goes from "I ran a script" to "I understand the architecture."
 
 1. **Per-layer analysis:** Quantize individual layers (or groups of layers) while keeping the rest of the model at the reference precision. Measure HumanEval degradation per layer to identify which layers are most sensitive.
-2. **Per-expert analysis (MoE-specific):** Since this is a Mixture of Experts model, analyze whether certain experts degrade more under quantization than others. This could reveal which experts encode more critical information.
+2. **MoE scope boundary:** Since this is a Mixture-of-Experts model, per-expert sensitivity is a natural extension. This phase does not claim expert-level optimization; it stops at layer-level policy because that evidence was complete and validated under deployment-style GGUF runs.
 3. **Methodology distinction:** GGUF artifacts are the right tool for whole-model deployment benchmarking. PyTorch/runtime ablations may be the right tool for targeted sensitivity analysis because they expose individual tensors and modules directly. If Notebook 07 uses simulated quantization in PyTorch, label the results as component-level sensitivity estimates, not final deployment measurements.
-4. **Mixed-precision policy:** Based on sensitivity results, recommend a policy such as INT4 for robust layers/experts and INT8 or FP16 for sensitive ones. The goal is to explain how one would approach INT4-like memory/speed while protecting components that appear quality-critical.
+4. **Mixed-precision policy:** Based on layer sensitivity results, recommend a policy such as Q4_K_M by default with Q8_0 protection for sensitive layers. The goal is to explain how one would approach INT4-like memory/speed while protecting components that appear quality-critical.
 
 ### Phase 5: Mixed Precision Synthesis
 
@@ -146,20 +146,23 @@ Notebook 09 validates concrete policy candidates:
 - Load one explicit policy candidate at a time.
 - Build or locate the corresponding mixed GGUF artifact.
 - Verify that protected tensors use the requested precision.
-- Run or load HumanEval quality results for FP16, Q8_0, Q4_K_M, and mixed GGUF artifacts.
-- Run or load a small same-harness performance benchmark.
+- Run fresh HumanEval quality results for FP16, Q8_0, Q4_K_M, and mixed GGUF artifacts when making final policy decisions.
+- Run fresh same-harness performance benchmarks for every compared artifact when making final policy decisions.
 - Save each policy iteration as a distinct validation artifact, then compare policy candidates.
 
 This phase exists because policy design and artifact validation are different claims. Notebook 08 can justify a candidate policy; Notebook 09 determines whether a particular artifact actually preserves enough quality while retaining enough of the Q4_K_M deployment payoff.
+
+The final canonical policy is `aggressive_q4_k_m_default_q8_protected_layers_3_11_14_26`: Q4_K_M by default with Q8_0 overrides for layers 3, 11, 14, and 26. It was selected after strict apples-to-apples Notebook 09 validation and bounded policy iteration. The 3-layer `11,14,26` variant and the 5-layer `2,3,11,14,26` variant both underperformed the canonical policy.
 
 ### Phase 7: Writeup
 
 Produce a clear README.md with:
 - Methodology description
 - Results tables (quality, speed, memory across precision levels)
-- Sensitivity analysis visualizations (heatmaps of per-layer/per-expert degradation)
+- Sensitivity analysis visualizations (heatmaps of per-layer degradation)
 - Key findings and interpretation
 - Mixed-precision policy recommendation, validation results, and any tooling limitations
+- Explicit MoE expert-analysis scope boundary and follow-up protocol
 - Reproduction instructions
 
 ## Evaluation Details
@@ -176,9 +179,9 @@ Produce a clear README.md with:
 - Same pass@k evaluation methodology
 
 ### Performance Metrics
-- Tokens/second: measure over 100+ generations and report mean and standard deviation
+- Tokens/second: report mean and standard deviation for the active harness. Notebook 09 uses a short same-session prompt benchmark for policy comparison; production-grade deployment claims would require a broader repeated prompt suite.
 - Memory: peak RSS during inference, measured via `psutil` or system tools
-- Report all measurements with variance — single-run numbers are not credible
+- Report measurement source and freshness. Mixed-source performance comparisons are not used for final policy decisions.
 
 ## Notes
 
