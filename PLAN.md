@@ -20,7 +20,7 @@ The main deliverable is the analysis: measured tradeoffs, clear methodology, sen
 - Model fits comfortably at FP16; INT8 and INT4 give progressively more headroom
 - Apple Silicon Neural Engine and AMX blocks handle low-precision matrix multiplies natively
 
-## Project Structure
+## Phase 1 Structure
 
 ```
 quantization-study/
@@ -92,14 +92,14 @@ Check Apple Silicon compatibility for each library before committing to a stack.
 
 ## Methodology
 
-### Phase 1: Baseline
+### Section 1: Baseline
 
 1. Load the model at full precision (FP16)
 2. Run HumanEval (164 problems) and record pass@1 scores
 3. Measure inference speed (tokens/second) and memory footprint
 4. Compare baseline results against published benchmarks to validate the evaluation pipeline
 
-### Phase 2: Quantization
+### Section 2: Quantization
 
 1. Quantize to INT8 using post-training quantization (PTQ)
 2. Quantize to INT4 using PTQ
@@ -108,7 +108,7 @@ Check Apple Silicon compatibility for each library before committing to a stack.
    - Export the quantized model to `exports/`
    - Record the quantization parameters (scale factors, zero points)
 
-### Phase 3: Benchmarking
+### Section 3: Benchmarking
 
 For each precision level (FP16, INT8, INT4), measure:
 - **Quality:** HumanEval pass@1, MBPP pass@1
@@ -120,7 +120,7 @@ Store all results as structured JSON in `results/`.
 
 Notebook 06 focuses on deployment-style behavior of complete GGUF artifacts. These results establish the practical payoff of quantization: smaller files, lower memory pressure, and faster inference. They do not, by themselves, explain which internal components are responsible for any quality change.
 
-### Phase 4: Sensitivity Analysis
+### Section 4: Sensitivity Analysis
 
 This is where the project goes from "I ran a script" to "I understand the architecture."
 
@@ -129,7 +129,7 @@ This is where the project goes from "I ran a script" to "I understand the archit
 3. **Methodology distinction:** GGUF artifacts are the right tool for whole-model deployment benchmarking. PyTorch/runtime ablations may be the right tool for targeted sensitivity analysis because they expose individual tensors and modules directly. If Notebook 07 uses simulated quantization in PyTorch, label the results as component-level sensitivity estimates, not final deployment measurements.
 4. **Mixed-precision policy:** Based on layer sensitivity results, recommend a policy such as Q4_K_M by default with Q8_0 protection for sensitive layers. The goal is to explain how one would approach INT4-like memory/speed while protecting components that appear quality-critical.
 
-### Phase 5: Mixed Precision Synthesis
+### Section 5: Mixed Precision Synthesis
 
 Notebook 08 synthesizes the deployment and sensitivity evidence:
 
@@ -139,7 +139,7 @@ Notebook 08 synthesizes the deployment and sensitivity evidence:
 - If the available tooling supports tensor-level or layer-level mixed-precision GGUF generation, prepare a candidate artifact plan and optionally build a candidate.
 - If the tooling does not support that cleanly, document the policy and the missing implementation step rather than forcing an artifact that the methodology cannot justify.
 
-### Phase 6: Mixed Precision Validation
+### Section 6: Mixed Precision Validation
 
 Notebook 09 validates concrete policy candidates:
 
@@ -154,7 +154,7 @@ This phase exists because policy design and artifact validation are different cl
 
 The final canonical policy is `aggressive_q4_k_m_default_q8_protected_layers_3_11_14_26`: Q4_K_M by default with Q8_0 overrides for layers 3, 11, 14, and 26. It was selected after strict apples-to-apples Notebook 09 validation and bounded policy iteration. The 3-layer `11,14,26` variant and the 5-layer `2,3,11,14,26` variant both underperformed the canonical policy.
 
-### Phase 7: Writeup
+### Section 7: Writeup
 
 Produce a clear README.md with:
 - Methodology description
@@ -164,6 +164,126 @@ Produce a clear README.md with:
 - Mixed-precision policy recommendation, validation results, and any tooling limitations
 - Explicit MoE expert-analysis scope boundary and follow-up protocol
 - Reproduction instructions
+
+## PHASE 2: Expert-Level MoE Quantization
+
+Phase 1 established a validated layer-level mixed-precision policy:
+`Q4_K_M` by default, with `Q8_0` protection for layers 3, 11, 14, and
+26. Phase 2 asks whether that policy is too blunt for a Mixture-of-Experts
+model. Instead of protecting an entire sensitive layer, the goal is to learn
+whether only specific routed experts inside those layers need higher
+precision.
+
+The target is not simply "INT8 quality at INT4 size." A more realistic and
+methodologically defensible goal is to improve the quality-size frontier:
+preserve most of the layer-level mixed policy's HumanEval recovery while
+moving the artifact closer to the `Q4_K_M` size, or recover additional
+quality without moving much toward the `Q8_0` size.
+
+### Phase 2 Learning Objective
+
+Determine whether MoE quantization sensitivity is concentrated in a small
+number of routed experts or distributed broadly across many experts and
+layers.
+
+This is the central conceptual question. If expert sensitivity is
+concentrated, per-expert mixed precision can improve on whole-layer
+protection. If it is diffuse, the layer-level policy may already be close to
+the useful abstraction for this model and backend.
+
+### Phase 2 Starting Scope
+
+Start with the already-protected sensitive layers: 3, 11, 14, and 26.
+
+These layers are the highest-value starting point because they currently
+carry the extra model-size cost of `Q8_0` protection. If only a subset of
+their routed experts needs protection, expert-level quantization can reduce
+model size while preserving the quality benefit of phase 1.
+
+Less-sensitive layers are a lower-priority starting point because they are
+already quantized aggressively under the canonical policy. They become
+interesting later if the project explores precision below `Q4_K_M` for
+especially safe experts.
+
+### Phase 2 Methodology Funnel
+
+Do not run full HumanEval once per expert. DeepSeek-Coder-V2-Lite has 26 MoE
+layers with 64 routed experts per MoE layer, which creates 1,664 routed expert
+targets before considering shared experts. A brute-force full benchmark sweep
+would be computationally wasteful and would obscure the learning objective.
+
+Use a staged funnel instead:
+
+1. **Routing telemetry:** Measure which experts are selected on HumanEval,
+   MBPP, and representative code prompts. Record per-layer and per-expert
+   activation counts, router probability mass, and task-level usage patterns.
+2. **Static quantization-error screening:** For each candidate expert, measure
+   how much simulated `Q4` or `Q4_K_M` quantization changes the expert
+   weights. Track reconstruction error, relative error, max error, and outlier
+   behavior.
+3. **Activation-aware proxy scoring:** Combine routing frequency with
+   quantization error. A fragile expert matters more when it is frequently
+   routed; a rarely used expert may be safe to quantize heavily even if its
+   raw weight error is large.
+4. **Short behavioral ablations:** Run small HumanEval subsets for selected
+   expert groups, not individual experts one at a time. Compare high-risk
+   experts, low-risk experts, and all-but-protected expert policies within one
+   sensitive layer.
+5. **Policy-level validation:** Promote only a few complete expert-level
+   policies to full HumanEval and same-harness performance validation.
+
+### Candidate Expert Policies
+
+Initial policy candidates should be framed around the phase-1 canonical model:
+
+- Keep the global default at `Q4_K_M`.
+- In protected layers 3, 11, 14, and 26, keep only the highest-risk experts at
+  `Q8_0`; quantize the remaining routed experts to `Q4_K_M`.
+- Compare this against the original whole-layer protection policy.
+- Optionally test a more aggressive variant where rarely routed experts in
+  otherwise sensitive layers are quantized below `Q4_K_M`, if the tooling
+  supports it cleanly.
+
+Example policy families:
+
+- **Top-k protected experts per sensitive layer:** protect the top 8, 16, or
+  24 experts ranked by routing-weighted quantization risk.
+- **Threshold-based protection:** protect experts whose risk score exceeds a
+  calibrated threshold instead of forcing the same number of protected experts
+  in every layer.
+- **Layer-adaptive protection:** protect more experts in layer 26 if its
+  sensitivity is more diffuse, and fewer experts in layers where sensitivity
+  is concentrated.
+
+### Expected Outcomes
+
+A good phase-2 result would match or nearly match the current layer-level
+mixed policy quality at a smaller artifact size. For example, preserving
+roughly the current mixed HumanEval score while moving from 10.46 GiB closer
+to the 9.66 GiB `Q4_K_M` artifact would show that whole-layer protection was
+too broad.
+
+A very good result would recover additional HumanEval quality while staying
+near the current mixed-policy size. An exceptional result would approach
+`Q8_0` quality while remaining close to `Q4_K_M` size, but this should not be
+assumed. The phase-1 results suggest that some quantization damage may be
+distributed across components rather than isolated entirely inside a few
+experts.
+
+### Phase 2 Evidence Standards
+
+- Treat routing and activation-aware scores as screening evidence, not final
+  quality claims.
+- Treat short HumanEval subsets as ranking evidence, not final pass@1 claims.
+- Make final policy decisions only from full HumanEval runs and fresh
+  same-harness performance measurements.
+- Save all intermediate telemetry and screening outputs under `results/` as
+  structured JSON.
+- Clearly distinguish PyTorch simulated quantization from validated GGUF
+  deployment artifacts.
+- Visualize every major step: routing heatmaps, expert usage histograms,
+  quantization-error distributions, risk-score rankings, and policy
+  quality-size tradeoff charts.
 
 ## Evaluation Details
 
