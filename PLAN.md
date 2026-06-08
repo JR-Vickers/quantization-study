@@ -180,6 +180,18 @@ preserve most of the layer-level mixed policy's HumanEval recovery while
 moving the artifact closer to the `Q4_K_M` size, or recover additional
 quality without moving much toward the `Q8_0` size.
 
+### Phase 2 Structure
+
+```
+quantization-study/
+├── notebooks/
+│   ├── 10_expert_routing_telemetry.ipynb
+│   ├── 11_expert_quantization_error.ipynb
+│   ├── 12_activation_aware_expert_scoring.ipynb
+│   ├── 13_expert_behavioral_ablations.ipynb
+│   └── 14_expert_policy_validation.ipynb
+```
+
 ### Phase 2 Learning Objective
 
 Determine whether MoE quantization sensitivity is concentrated in a small
