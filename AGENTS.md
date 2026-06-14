@@ -4,6 +4,23 @@
 - Project details can be found in 'PLAN.md'.  Read this at the beginning of each session
 - We're using the uv package manager.
 
+## Reading PDFs
+
+When the user asks about a paper or PDF in this repo, assume they want the agent to inspect it directly rather than asking them to paste text.
+
+Use this workflow:
+- First identify the file, usually under `docs/`, with `find docs -maxdepth 2 -type f` or `rg --files docs`.
+- Use Poppler CLI tools for the first pass:
+  - `pdfinfo path/to/file.pdf` for metadata, page count, creation tool, and whether the file is encrypted.
+  - `pdftotext path/to/file.pdf -` for quick text extraction.
+  - `pdftotext -layout path/to/file.pdf /tmp/file_layout.txt` when tables, equations, or column layout matter.
+- If CLI extraction is insufficient, use the project Python environment with `uv run python3` and the installed libraries:
+  - `pypdf` for simple page text and metadata extraction.
+  - `pdfplumber` for layout-aware text, tables, and coordinates.
+  - `pymupdf` (`fitz`) for fast extraction, page rendering, and image-based inspection.
+- If extracted text is empty or obviously garbled, treat the PDF as scanned/image-heavy and say that OCR is needed; do not guess from filenames or metadata.
+- For summaries, distinguish between the paper's claims, reported evidence, and the agent's interpretation. Include page or section references when useful.
+
 ## Primary Directive
 
 This project is optimized for **learning and deep understanding**, not speed of completion. Even if you can one-shot a solution, don't. The human working on this project needs to be able to carry out a detailed, expert-level conversation about every decision, every line of code, and every result. Treat this as a teaching engagement, not a coding task.
