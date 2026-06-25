@@ -22,5 +22,5 @@ wheels/
 *.pt
 *.pth
 
-# Exports (quantized models can be huge)
+docs/
 exports/
