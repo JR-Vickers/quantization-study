@@ -129,6 +129,25 @@ This project uses `uv`.
 uv sync
 ```
 
+To quickly reproduce the headlines results, from the .json artifacts, run:
+
+```bash
+uv run reproduce
+```
+
+Add the `--check-artifacts` flag to verify if required .gguf files are present:
+
+```bash
+uv run reproduce --check-artifacts
+```
+
+For a full repduction, add the `--full-validation` flag.
+WARNING: this involves running eval pipelines locally, which will consume **significant** computing resources and time.  **Do not use this unless you know what you are doing.**
+
+```bash
+uv run reproduce --full-validation
+```
+
 Run notebooks in order from `notebooks/01...ipynb` through
 `notebooks/09...ipynb`.
 
