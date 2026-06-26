@@ -40,7 +40,7 @@ quantization-study/
 ├── .gitignore
 ├── README.md
 ├── PLAN.md
-├── CLAUDE.md
+├── AGENTS.md
 └── requirements.txt
 ```
 

@@ -1,4 +1,4 @@
-# CLAUDE.md — Custom Instructions for This Project
+# AGENTS.md — Custom Instructions for This Project
 
 ## Notes
 - Project details can be found in 'PLAN.md'.  Read this at the beginning of each session
