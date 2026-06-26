@@ -1,13 +1,21 @@
 # Quantization Study: DeepSeek-Coder-V2-Lite-Instruct
 
-This project studies post-training quantization tradeoffs for `deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct`, a 16B-parameter Mixture-of-Experts coding model, on local Apple Silicon hardware.
+This project asks if selective mixed-precision quantization can recover meaningful code-generation quality from aggressive INT4 quantization while preserving most of its local inference speed and memory benefits.
 
-I chose this model for a few reasons.  I wanted to begin with a coding model because code generations lend themselves well to benchmarking - pass/fail criteria is just "Did the generated code output the correct result?"  I went with a smaller 16B model due to hardware constraints - I used a Macbook Pro M4 Max with 64 GB of RAM.  Models much larger than this would slow down the iteration speed too much.  Additionally, this model has a fairly sophisticated architecture that opens up several avenues for discovery.  In particular, it's a mixture-of-experts (MoE) model, which permits per-expert sensitivity analysis and quantization.  As of this writing, this project implements per-layer mixed-precision quantization.  Per-expert quantization is reserved for a future update.
+This project uses `deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct`, a 16B-parameter Mixture-of-Experts coding model, running on local Apple Silicon hardware.
+
+I chose this model for a few reasons.  I wanted to begin with a coding model because code generations lend themselves well to benchmarking - pass/fail criteria is just "Did the generated code output the correct result?"  I went with a smaller 16B model due to hardware constraints - I used a Macbook Pro M4 Max with 64 GB of RAM.  Models much larger than this would slow down the iteration speed too much.  Additionally, this model has a fairly sophisticated architecture that opens up several avenues for research.  In particular, it's a mixture-of-experts (MoE) model, which permits per-expert sensitivity analysis and quantization.  As of this writing, this project implements per-layer mixed-precision quantization.  Per-expert quantization is reserved for a future update.
 
 This project has several nested goals.  Ultimately, it produces a model that uses selective quantization to improve model performance with minimal performance degradation.  Along the way, it establishes baselines, measures deployment tradeoffs, identifies sensitive components, designs a mixed-precision policy, and validates that policy with a strict same-harness comparison.
 
-## Phase 1 Summary
+## Why This Matters
+As documented below, naive whole-model quantization at INT4 or below degrades model performance far beyond what is acceptable.  INT8 quantization performs well at evals, but it sacrifices model compression to a large degree.  
+Mixed precision is an attempt to reclaim some of the benchmark performance of INT8 quantization while maintaining the performance gains of INT4 quantization.
 
+## Main Finding
+On `deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct`, protecting layers 3, 11, 14, and 26 at Q8_0 recovered +6.71 HumanEval pass@1 points compared to Q4_K_M, while keeping the artifact 64% smaller than fp16 and 1.61x faster in the local benchmark.
+
+## Summary of Findings
 Final canonical mixed policy:
 
 - Default precision: `Q4_K_M`
